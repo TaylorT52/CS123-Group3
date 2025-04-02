@@ -17,7 +17,7 @@ LOOP_RATE = 200  # Hz
 MAX_TORQUE = 3.0
 
 class JointStateSubscriber(Node):
-
+#test
     def __init__(self):
         super().__init__('joint_state_subscriber')
         # Create a subscriber to the /joint_states topic
