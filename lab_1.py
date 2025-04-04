@@ -9,8 +9,8 @@ from collections import deque
 JOINT_NAME = 'leg_front_r_1'
 ####
 ####
-KP = 0 # YOUR KP VALUE
-KD = 0 # YOUR KD VALUE
+KP = 0.1 # YOUR KP VALUE
+KD = 5 # KD VALUE
 ####
 ####
 LOOP_RATE = 200  # Hz
@@ -51,14 +51,19 @@ class JointStateSubscriber(Node):
         #### YOUR CODE HERE
         ####
 
-        # target_joint_pos, target_joint_vel
-        return 0, 0 
+        target_joint_pos = 0.5
+        target_joint_vel = 0.0
+        return target_joint_pos, target_joint_vel
 
     def calculate_pd_torque(self, joint_pos, joint_vel, target_joint_pos, target_joint_vel):
-        ####
-        #### YOUR CODE HERE
-        ####
-        return 0
+
+        position_error = target_joint_pos - joint_pos
+        velocity_error = target_joint_vel - joint_vel
+        
+        # Calculate torque using both P and D terms
+        torque = KP * position_error + KD * velocity_error
+        
+        return torque
 
     def print_info(self):
         if self.print_counter == 0:
