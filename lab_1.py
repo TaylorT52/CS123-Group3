@@ -4,17 +4,21 @@ from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64MultiArray
 import numpy as np
 import time
+import math
 from collections import deque
 
 JOINT_NAME = 'leg_front_r_1'
 ####
 ####
-KP = 0.1 # YOUR KP VALUE
-KD = 5 # KD VALUE
+KP = 3 # YOUR KP VALUE 0.2 works for P control
+KD = 0.1 # KD VALUE
 ####
 ####
 LOOP_RATE = 200  # Hz
 MAX_TORQUE = 3.0
+DELAY_SECONDS = 0.01
+FREQUENCY = 2
+
 
 class JointStateSubscriber(Node):
 #test
@@ -41,6 +45,11 @@ class JointStateSubscriber(Node):
         self.joint_vel = 0
         self.target_joint_pos = 0
         self.target_joint_vel = 0
+
+        self.delay_buffer_size = int(DELAY_SECONDS * LOOP_RATE)
+        self.angle_buffer = deque(maxlen=self.delay_buffer_size)
+        self.velocity_buffer = deque(maxlen=self.delay_buffer_size)
+
         # self.torque_history = deque(maxlen=DELAY)
 
         # Create a timer to run pd_loop at the specified frequency
@@ -51,11 +60,19 @@ class JointStateSubscriber(Node):
         #### YOUR CODE HERE
         ####
 
-        target_joint_pos = 0.5
+        target_joint_pos = 0.0
         target_joint_vel = 0.0
         return target_joint_pos, target_joint_vel
 
     def calculate_pd_torque(self, joint_pos, joint_vel, target_joint_pos, target_joint_vel):
+
+        self.angle_buffer.append(joint_pos)
+        self.velocity_buffer.append(joint_vel)
+        joint_pos = self.angle_buffer[0]
+        joint_vel = self.velocity_buffer[0]
+
+        current_time = time.time()
+        target_joint_pos = math.sin(2 * math.pi * FREQUENCY * current_time)
 
         position_error = target_joint_pos - joint_pos
         velocity_error = target_joint_vel - joint_vel
@@ -117,3 +134,4 @@ def main(args=None):
 
 if __name__ == '__main__':
     main()
+
