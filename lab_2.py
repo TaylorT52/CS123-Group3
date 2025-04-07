@@ -64,10 +64,12 @@ class ForwardKinematics(Node):
             ])
 
         def translation(x, y, z):
-            ## TODO: Implement the translation matrix
-            # return np.array([
-            # ])
-            None
+            return np.array([
+                [1, 0, 0, x],
+                [0, 1, 0 ,y],
+                [0, 0, 1, z],
+                [0, 0, 0, 1]
+            ])
 
         # T_0_1 (base_link to leg_front_r_1)
         T_0_1 = translation(0.07500, -0.0445, 0) @ rotation_x(1.57080) @ rotation_z(theta1)
