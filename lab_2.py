@@ -71,25 +71,28 @@ class ForwardKinematics(Node):
                 [0, 0, 0, 1]
             ])
 
+
+        #translation matrices 
+        
         # T_0_1 (base_link to leg_front_r_1)
         T_0_1 = translation(0.07500, -0.0445, 0) @ rotation_x(1.57080) @ rotation_z(theta1)
 
         # T_1_2 (leg_front_r_1 to leg_front_r_2)
         ## TODO: Implement the transformation matrix from leg_front_r_1 to leg_front_r_2
-        T_1_2 = None
+        T_1_2 = translation(-0.039, 0, 0) @ rotation_z(-np.pi / 2) 
 
         # T_2_3 (leg_front_r_2 to leg_front_r_3)
         ## TODO: Implement the transformation matrix from leg_front_r_2 to leg_front_r_3
-        T_2_3 = None
+        T_2_3 = translation(0.0685, 0, -0.0494) @ rotation_y(-np.pi / 2)
 
         # T_3_ee (leg_front_r_3 to end-effector)
-        T_3_ee = None
+        T_3_ee = translation(-0.018, -0.06216, 0.06231)
 
         # TODO: Compute the final transformation. T_0_ee is a concatenation of the previous transformation matrices
-        T_0_ee = None
+        T_0_ee = T_0_1 @ T_1_2 @ T_2_3 @ T_3_ee
 
         # TODO: Extract the end-effector position. The end effector position is a 3x3 matrix (not in homogenous coordinates)
-        end_effector_position = None
+        end_effector_position = T_0_ee[:3, 3] 
 
         return end_effector_position
 
