@@ -123,11 +123,7 @@ class InverseKinematics(Node):
             return None, None
 
         def gradient(theta, epsilon=1e-3):
-            # Compute the gradient of the cost function using finite differences
-            ################################################################################################
-            # TODO: Implement the gradient computation
-            ################################################################################################
-            return
+            return (cost_function(theta + epsilon) - cost_function(theta - epsilon)) / (2*epsilon)
 
         theta = np.array(initial_guess)
         learning_rate = None # TODO: Set the learning rate
