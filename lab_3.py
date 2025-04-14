@@ -85,9 +85,7 @@ class InverseKinematics(Node):
                 [0, 0, 0, 1]
             ])
 
-
         #translation matrices 
-
         # T_0_1 (base_link to leg_front_r_1)
         T_0_1 = translation(0.07500, -0.0445, 0) @ rotation_x(1.57080) @ rotation_z(theta1)
 
@@ -120,7 +118,13 @@ class InverseKinematics(Node):
             # TODO: Implement the cost function
             # HINT: You can use the * notation on a list to "unpack" a list
             ################################################################################################
-            return None, None
+            
+            #get curr ee pos, calc the l1 distance, and then calc cost
+            curr_ee = self.forward_kinematics(*theta)
+            l1dist = [abs(curr - target) for curr, target in zip(curr_ee, target_ee)]
+            cost = sum((curr - target) ** 2 for curr, target in zip(curr_ee, target_ee))
+            
+            return cost, l1dist
 
         def gradient(theta, epsilon=1e-3):
             return (cost_function(theta + epsilon) - cost_function(theta - epsilon)) / (2*epsilon)
