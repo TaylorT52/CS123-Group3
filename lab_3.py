@@ -161,9 +161,24 @@ class InverseKinematics(Node):
         ################################################################################################
         # TODO: Implement the interpolation function
         ################################################################################################
+        
+        #TODO: adjust this
+        cycle_time = 1.0
 
+        t_norm = (t % cycle_time) / cycle_time
 
-        return
+        n_pts = len(self.ee_triangle_positions)
+        seg_dur = 1.0 / n_pts
+        seg = int(t_norm / seg_dur)
+
+        start = self.ee_triangle_positions[seg]
+        end = self.ee_triangle_positions[(seg + 1) % n_pts]
+
+        local_t = (t_norm - seg * seg_dur) / seg_dur
+
+        interpolated = (1 - local_t) * start + local_t * end
+
+        return interpolated
 
     def ik_timer_callback(self):
         if self.joint_positions is not None:
