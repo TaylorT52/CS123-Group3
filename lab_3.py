@@ -163,7 +163,7 @@ class InverseKinematics(Node):
         ################################################################################################
         
         #TODO: adjust this
-        cycle_time = 1.0
+        cycle_time = 3.0
 
         t_norm = (t % cycle_time) / cycle_time
 
