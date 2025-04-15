@@ -163,7 +163,7 @@ class InverseKinematics(Node):
             cost, l1 = cost_function(theta)
             cost_l.append(cost)
 
-            if max(l1) < tolerance: 
+            if np.mean(l1) < tolerance: 
                 break
             
             grad = gradient(theta)
