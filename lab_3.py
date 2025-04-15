@@ -161,6 +161,8 @@ class InverseKinematics(Node):
         ################################################################################################
         # TODO: Implement the interpolation function
         ################################################################################################
+
+
         return
 
     def ik_timer_callback(self):
@@ -173,7 +175,8 @@ class InverseKinematics(Node):
             ################################################################################################
             # TODO: Implement the time update
             ################################################################################################
-            
+            self.t += self.ik_timer_period
+
             self.get_logger().info(f'Target EE: {target_ee}, Current EE: {current_ee}, Target Angles: {self.target_joint_positions}, Target Angles to EE: {self.forward_kinematics(*self.target_joint_positions)}, Current Angles: {self.joint_positions}')
 
     def pd_timer_callback(self):
