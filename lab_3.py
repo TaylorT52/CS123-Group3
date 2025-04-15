@@ -5,9 +5,6 @@ from std_msgs.msg import Float64MultiArray
 import numpy as np
 np.set_printoptions(precision=3, suppress=True)
 
-Kp = 3
-Kd = 0.1
-
 class InverseKinematics(Node):
 
     def __init__(self):
@@ -111,7 +108,7 @@ class InverseKinematics(Node):
     
 
 
-    def inverse_kinematics(self, target_ee, initial_guess=[0, 0, 0]):
+    def inverse_kinematics(self, target_ee, initial_guess=[2., 2., 2.]):
         def cost_function(theta):
             # Compute the cost function and the L1 norm of the error
             # return the cost and the L1 norm of the error
@@ -122,8 +119,10 @@ class InverseKinematics(Node):
             
             #get curr ee pos, calc the l1 distance, and then calc cost
             curr_ee = self.forward_kinematics(*theta)
-            l1dist = [abs(curr - target) for curr, target in zip(curr_ee, target_ee)]
-            cost = sum((curr - target) ** 2 for curr, target in zip(curr_ee, target_ee))
+            error = curr_ee - target_ee
+
+            l1dist = np.abs(error)
+            cost = np.sum(error**2)
             
             return cost, l1dist
 
@@ -148,11 +147,10 @@ class InverseKinematics(Node):
             
 
         theta = np.array(initial_guess)
-        learning_rate = 10 # TODO: tune the learning rate
-        max_iterations = 100 # TODO: Set the maximum number of iterations
-        tolerance = 0.01 #TODO :Set the tolerance for the L1 norm of the error
+        learning_rate = 5 # TODO: tune the learning rate
+        max_iterations = 10 # TODO: Set the maximum number of iterations
+        tolerance = 0.001 #TODO :Set the tolerance for the L1 norm of the error
 
-        cost_l = []
         for _ in range(max_iterations):
             # Update the theta (parameters) using the gradient and the learning rate
             ################################################################################################
@@ -161,15 +159,12 @@ class InverseKinematics(Node):
             # TODO (BONUS): Implement the (quasi-)Newton's method instead of finite differences for faster convergence
             ################################################################################################
             cost, l1 = cost_function(theta)
-            cost_l.append(cost)
 
             if np.mean(l1) < tolerance: 
                 break
             
             grad = gradient(theta)
             theta -= grad * learning_rate
-
-        print(f'Cost: {cost_l}') # Use to debug to see if you cost function converges within max_iterations
 
         return theta
 
@@ -179,22 +174,19 @@ class InverseKinematics(Node):
         ################################################################################################
         # TODO: Implement the interpolation function
         ################################################################################################
-        
-        #TODO: adjust this
-        cycle_time = 3.0
+        t_mod = t % 3
 
-        t_norm = (t % cycle_time) / cycle_time
+        vertices = self.ee_triangle_positions
 
-        n_pts = len(self.ee_triangle_positions)
-        seg_dur = 1.0 / n_pts
-        seg = int(t_norm / seg_dur)
-
-        start = self.ee_triangle_positions[seg]
-        end = self.ee_triangle_positions[(seg + 1) % n_pts]
-
-        local_t = (t_norm - seg * seg_dur) / seg_dur
-
-        interpolated = (1 - local_t) * start + local_t * end
+        if t_mod < 1.0:
+            alpha = t_mod
+            interpolated = (1-alpha) * vertices[0] + alpha * vertices[1]
+        elif t_mod < 2.0:
+            alpha = (t_mod - 1.0)
+            interpolated = (1-alpha) * vertices[1] + alpha * vertices[2]
+        else:
+            alpha = (t_mod - 2.0)
+            interpolated = (1-alpha) * vertices[2] + alpha * vertices[0]
 
         return interpolated
 
