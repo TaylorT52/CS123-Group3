@@ -125,10 +125,12 @@ class InverseKinematics(Node):
         return T_RF_0_ee[:3, 3]
 
     def fl_leg_fk(self, theta):
-        ################################################################################################
-        # TODO: implement forward kinematics here
-        ################################################################################################
-        return
+        T_RF_0_1 = translation(0.07500, 0.08350, 0) @ rotation_x(1.57080) @ rotation_z(theta[0])
+        T_RF_1_2 = rotation_y(-1.57080) @ rotation_z(theta[1])
+        T_RF_2_3 = translation(0, -0.04940, 0.06850) @ rotation_y(1.57080) @ rotation_z(theta[2])
+        T_RF_3_ee = translation(0.06231, -0.06216, -0.01800)
+        T_RF_0_ee = T_RF_0_1 @ T_RF_1_2 @ T_RF_2_3 @ T_RF_3_ee
+        return T_RF_0_ee[:3, 3]
 
     def br_leg_fk(self, theta):
         ################################################################################################
