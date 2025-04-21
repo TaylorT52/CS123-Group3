@@ -6,28 +6,39 @@ import numpy as np
 np.set_printoptions(precision=3, suppress=True)
 
 def rotation_x(angle):
-    ################################################################################################
-    # TODO: [already done] paste lab 2 forward kinematics here
-    ################################################################################################
-    return
+    # rotation about the x-axis implemented for you
+    return np.array([
+        [1, 0, 0, 0],
+        [0, np.cos(angle), -np.sin(angle), 0],
+        [0, np.sin(angle), np.cos(angle), 0],
+        [0, 0, 0, 1]
+    ])
+
 
 def rotation_y(angle):
-    ################################################################################################
-    # TODO: [already done] paste lab 2 forward kinematics here
-    ################################################################################################
-    return
+   return np.array([
+    [np.cos(angle), 0, np.sin(angle), 0],
+    [0, 1, 0, 0],
+    [-np.sin(angle), 0, np.cos(angle), 0], 
+    [0, 0, 0, 1]
+    ])
 
 def rotation_z(angle):
-    ################################################################################################
-    # TODO: [already done] paste lab 2 forward kinematics here
-    ################################################################################################
-    return
+    return np.array([
+        [np.cos(angle), -np.sin(angle), 0, 0], 
+        [np.sin(angle), np.cos(angle), 0, 0], 
+        [0, 0, 1, 0], 
+        [0, 0, 0, 1]
+    ])
 
 def translation(x, y, z):
-    ################################################################################################
-    # TODO: [already done] paste lab 2 forward kinematics here
-    ################################################################################################
-    return
+    return np.array([
+        [1, 0, 0, x],
+        [0, 1, 0 ,y],
+        [0, 0, 1, z],
+        [0, 0, 0, 1]
+    ])
+
 
 class InverseKinematics(Node):
 
@@ -148,39 +159,89 @@ class InverseKinematics(Node):
         leg_forward_kinematics = self.fk_functions[leg_index]
 
         def cost_function(theta):
-            current_position = leg_forward_kinematics(theta)
+            # Compute the cost function and the L1 norm of the error
+            # return the cost and the L1 norm of the error
             ################################################################################################
-            # TODO: [already done] paste lab 3 inverse kinematics here
+            # TODO: Implement the cost function
+            # HINT: You can use the * notation on a list to "unpack" a list
             ################################################################################################
-            return None, None
-
+            
+            #get curr ee pos, calc the l1 distance, and then calc cost
+            curr_ee = self.forward_kinematics(*theta)
+            l1dist = [abs(curr - target) for curr, target in zip(curr_ee, target_ee)]
+            cost = sum((curr - target) ** 2 for curr, target in zip(curr_ee, target_ee))
+            
+            return cost, l1dist
+        
         def gradient(theta, epsilon=1e-3):
-            grad = np.zeros(3)
-            ################################################################################################
-            # TODO: [already done] paste lab 3 inverse kinematics here
-            ################################################################################################
+            # compute the gradient using finite diff 
+            n = len(theta)
+            grad = np.zeros(n)
+            for i in range(n):
+                theta_plus = theta.copy()
+                theta_plus[i] += epsilon
+                cost_plus, _ = cost_function(theta_plus)
+
+                theta_minus = theta.copy()
+                theta_minus[i] -= epsilon
+                cost_minus, _ = cost_function(theta_minus)
+
+                grad[i] = (cost_plus - cost_minus) / (2 * epsilon)
+                    
             return grad
+            
 
         theta = np.array(initial_guess)
-        learning_rate = None # TODO:[already done] paste lab 3 inverse kinematics here
-        max_iterations = None # TODO: [already done] paste lab 3 inverse kinematics here
-        tolerance = None # TODO: [already done] paste lab 3 inverse kinematics here
+        learning_rate = 0.001 # TODO: tune the learning rate
+        max_iterations = 100 # TODO: Set the maximum number of iterations
+        tolerance = 0.01 #TODO :Set the tolerance for the L1 norm of the error
 
         cost_l = []
+
         for _ in range(max_iterations):
+            # Update the theta (parameters) using the gradient and the learning rate
             ################################################################################################
-            # TODO: [already done] paste lab 3 inverse kinematics here
+            # TODO: Implement the gradient update. Use the cost function you implemented, and use tolerance t
+            # to determine if IK has converged
+            # TODO (BONUS): Implement the (quasi-)Newton's method instead of finite differences for faster convergence
             ################################################################################################
-            continue
+            cost, l1 = cost_function(theta)
+            cost_l.append(cost)
+
+            if np.mean(l1) < tolerance: 
+                break
+            
+            grad = gradient(theta)
+            theta -= grad * learning_rate
+
+        print(f'Cost: {cost_l}') # Use to debug to see if you cost function converges within max_iterations
 
         return theta
 
     def interpolate_triangle(self, t, leg_index):
+        # Intepolate between the three triangle positions in the self.ee_triangle_positions
+        # based on the current time t
         ################################################################################################
-        # TODO: implement interpolation for all 4 legs here
+        # TODO: Implement the interpolation function
         ################################################################################################
         
-        return
+        #TODO: adjust this
+        cycle_time = 3.0
+
+        t_norm = (t % cycle_time) / cycle_time
+
+        n_pts = len(self.ee_triangle_positions)
+        seg_dur = 1.0 / n_pts
+        seg = int(t_norm / seg_dur)
+
+        start = self.ee_triangle_positions[seg]
+        end = self.ee_triangle_positions[(seg + 1) % n_pts]
+
+        local_t = (t_norm - seg * seg_dur) / seg_dur
+
+        interpolated = (1 - local_t) * start + local_t * end
+
+        return interpolated
 
     def cache_target_joint_positions(self):
         # Calculate and store the target joint positions for a cycle and all 4 legs
