@@ -83,6 +83,8 @@ class StateMachineNode(Node):
                 min_x = x_val 
                 min_detect = None
 
+        self.last_detection_time = self.get_clock().now()
+
         return min_detect 
                 
         
