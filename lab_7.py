@@ -46,7 +46,30 @@ class StateMachineNode(Node):
         Determine which of the HAILO detections is the most central detected object
         """
         pass # TODO: Part 1
+        breakpoint()
+        # x = detection.bbox.center.x
+        # note: use breakpoint to determine x
+        x = None
+        
+        # 3. normalize 
+        norm_x = (x / IMAGE_WIDTH) * 2 - 1
+        
+        # 4. Verify Position (print)
+        print(norm_x)
 
+        # 5. find most centered bounding box 
+        # basically, find x val nearest to 0
+        min_x = float('inf')
+        for elem in msg:
+            # figure out how to get x from msg 
+            x_val = msg['x']
+            if x_val < min_x: 
+                min_x = x_val 
+                min_detect = None
+
+        return min_detect 
+                
+        
     def timer_callback(self):
         """
         Implement a timer callback that sets the moves through the state machine based on if the time since the last detection is above a threshold TIMEOUT
