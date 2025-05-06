@@ -7,12 +7,10 @@ import numpy as np
 
 IMAGE_WIDTH = 1400
 
-# TODO: Add your new constants here
-
 TIMEOUT = pass #TODO threshold in timer_callback
 SEARCH_YAW_VEL = pass #TODO searching constant
-TRACK_FORWARD_VEL = pass #TODO tracking constant
-KP = pass #TODO proportional gain for tracking
+TRACK_FORWARD_VEL = 0.15
+KP = 1.6 
 
 class State(Enum):
     SEARCH = 0
@@ -86,7 +84,8 @@ class StateMachineNode(Node):
         if self.state == State.SEARCH:
             pass # TODO: Part 3.1
         elif self.state == State.TRACK:
-            pass # TODO: Part 2 / 3.4
+            yaw_command = -KP * self.target_x_norm
+            forward_vel_command = TRACK_FORWARD_VEL
 
         cmd = Twist()
         cmd.angular.z = yaw_command
