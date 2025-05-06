@@ -35,6 +35,7 @@ class StateMachineNode(Node):
             10
         )
 
+        self.last_detection = None # init for detection_callback
         self.timer = self.create_timer(0.1, self.timer_callback)
         self.state = State.TRACK
 
@@ -45,6 +46,23 @@ class StateMachineNode(Node):
         """
         Determine which of the HAILO detections is the most central detected object
         """
+
+        # update syntax using breakpoint
+        detection_data = {}
+        for i,detection in enumerate(msg): 
+            x = detection.boundingBox2d.center.x
+            # normalize x 
+            x_norm = (x_position - (IMAGE_WIDTH / 2)) / (IMAGE_WIDTH / 2)
+            detections_data[i] = {
+            "x_norm": x_norm,
+            "bbox": detection.boundingBox2d
+            }
+
+        closest_index = min(detections_dict, key=lambda i: abs(detections_dict[i]["x_norm"]))
+        closest_detection_bb = detections_dict[closest_index]['bbox']
+
+        self.last_detection_time = self.get_clock().now()
+
         pass # TODO: Part 1
 
     def timer_callback(self):
